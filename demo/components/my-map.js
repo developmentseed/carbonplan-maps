@@ -4,6 +4,7 @@ import React, {
   useRef,
   useCallback,
   useEffect,
+  forwardRef
 } from 'react'
 import mapboxgl from 'mapbox-gl'
 import getConfig from 'next/config'
@@ -11,23 +12,25 @@ const { publicRuntimeConfig } = getConfig()
 
 mapboxgl.accessToken = publicRuntimeConfig.MAPBOX_TOKEN
 
-const Mapbox = ({
-  glyphs,
-  style,
-  initialCenter,
-  initialZoom,
-  minZoom,
-  maxZoom,
-  maxBounds,
-  source,
-  debug,
-  variable,
-  color, 
-  opacity,
-  setZoom,
-  setCenter,
-  width=1
-}) => {
+const Mapbox = forwardRef((props, ref) => {
+  const {
+    glyphs,
+    style,
+    initialCenter,
+    initialZoom,
+    minZoom,
+    maxZoom,
+    maxBounds,
+    source,
+    debug,
+    variable,
+    color, 
+    opacity,
+    setZoom,
+    setCenter,
+    width=1
+  } = props
+  
   const map = useRef()
   const containerRef = useRef()
   const [ready, setReady] = useState()
@@ -73,7 +76,7 @@ const Mapbox = ({
       }
     }]}
 
-      map.current = new mapboxgl.Map({
+      ref.current = new mapboxgl.Map({
         container: containerRef.current,
         style: mapboxStyle, 
         minZoom: minZoom,
@@ -95,31 +98,31 @@ const Mapbox = ({
         map.getSource(sourceId).maxzoom = maxZoom
       }
 
-      map.current.touchZoomRotate.disableRotation()
-      map.current.touchPitch.disable()
-      map.current.on('styledata', () => {
+      ref.current.touchZoomRotate.disableRotation()
+      ref.current.touchPitch.disable()
+      ref.current.on('styledata', () => {
         setReady(true)
       })
 
       const moveCallback = () => {
-        const currentCenter = map.current.getCenter();
-        const currentZoom = map.current.getZoom();
+        const currentCenter = ref.current.getCenter();
+        const currentZoom = ref.current.getZoom();
         setCenter(currentCenter)
         setZoom(currentZoom)
       }
-      map.current.on('render', moveCallback )
+      ref.current.on('render', moveCallback )
       
       return () => {
-        if (map.current) {
-          map.current.remove()
-          map.current.off('render', moveCallback)
+        if (ref.current) {
+          ref.current.remove()
+          ref.current.off('render', moveCallback)
           setReady(false)
         }
       }
   }, [])
 
   useEffect(() => {
-    map.current.showTileBoundaries = debug
+    ref.current.showTileBoundaries = debug
   }, [debug])
 
   return (
@@ -137,6 +140,6 @@ const Mapbox = ({
       
     </div>
   )
-}
+})
 
 export default Mapbox

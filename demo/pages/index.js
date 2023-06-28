@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Box, useThemeUI } from 'theme-ui'
 import { Dimmer, Meta } from '@carbonplan/components'
 import { Map, Raster, Fill, Line, RegionPicker } from '@carbonplan/maps'
@@ -24,6 +24,8 @@ const Index = () => {
 
   const[zoom, setZoom] = useState(0)
   const[center, setCenter] = useState({lng: 0, lat: 0})
+
+  const ref = useRef();
 
   const getters = { display, debug, opacity, clim, month, band, colormapName }
   const setters = {
@@ -57,6 +59,7 @@ const Index = () => {
           )}
         <Map>
           <Raster
+            mapRef={ref}
             colormap={colormap}
             clim={clim}
             display={display}
@@ -70,7 +73,8 @@ const Index = () => {
             regionOptions={{ setData: setRegionData }}
           />
         </Map>
-        <MyMap 
+        <MyMap
+          ref={ref} 
           initialZoom={zoom} 
           initialCenter={center} 
           setZoom={setZoom}

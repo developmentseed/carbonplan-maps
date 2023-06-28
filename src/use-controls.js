@@ -1,25 +1,25 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { flushSync } from 'react-dom'
-import { useMapbox } from './mapbox'
 
-export const useControls = () => {
+export const useControls = (mapRef) => {
   const [zoom, setZoom] = useState()
   const [center, setCenter] = useState()
-  const { map } = useMapbox()
+
 
   const updateControlsSync = useCallback(() => {
     flushSync(() => {
-      setZoom(map.getZoom())
-      setCenter(map.getCenter())
+      setZoom(mapRef.current.getZoom())
+      setCenter(mapRef.current.getCenter())
     })
   }, [])
 
   useEffect(() => {
-    setZoom(map.getZoom())
-    setCenter(map.getCenter())
-    map.on('load', updateControlsSync)
-    map.on('move', updateControlsSync)
-  }, [map])
+    if (!mapRef.current) return 
+    setZoom(mapRef.current.getZoom())
+    setCenter(mapRef.current.getCenter())
+    mapRef.current.on('load', updateControlsSync)
+    mapRef.current.on('move', updateControlsSync)
+  }, [mapRef.current])
 
   return { center: center, zoom: zoom }
 }
