@@ -1,7 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { useRegl } from './regl'
-import { useMapbox } from './mapbox'
-import { useControls } from './use-controls'
+
 import { createTiles } from './tiles'
 import { useRegion } from './region/context'
 import { useSetLoading } from './loading'
@@ -16,13 +15,14 @@ const Raster = (props) => {
     regionOptions = {},
     selector = {},
     uniforms = {},
+    center = {lng:0, lat:0},
+    zoom=2
   } = props
-  const { center, zoom } = useControls()
+  
   const [regionDataInvalidated, setRegionDataInvalidated] = useState(
     new Date().getTime()
   )
   const { regl } = useRegl()
-  const { map } = useMapbox()
   const { region } = useRegion()
   const { setLoading, clearLoading, loading, chunkLoading, metadataLoading } =
     useSetLoading()
@@ -31,7 +31,6 @@ const Raster = (props) => {
   const lastQueried = useRef()
 
   camera.current = { center: center, zoom: zoom }
-
   const queryRegion = async (r, s) => {
     const queryStart = new Date().getTime()
     lastQueried.current = queryStart
@@ -52,7 +51,11 @@ const Raster = (props) => {
       setLoading,
       clearLoading,
       invalidate: () => {
-        map.triggerRepaint()
+        console.log('invalidate') // When zoom is high, this gets called a lot - almost breaks
+        // map.triggerRepaint()
+        if (!tiles.current) return
+        tiles.current.updateCamera(camera.current)
+        tiles.current.draw()
       },
       invalidateRegion: () => {
         setRegionDataInvalidated(new Date().getTime())
@@ -77,23 +80,28 @@ const Raster = (props) => {
   }, [!!props.setChunkLoading, chunkLoading])
 
   useEffect(() => {
-    const callback = () => {
-      if (Object.values(camera.current).some(Boolean)) {
-        tiles.current.updateCamera(camera.current)
-        tiles.current.draw()
-      }
+    if (!tiles.current) return
+    if (Object.values(camera.current).some(Boolean)) {
+      tiles.current.updateCamera(camera.current)
+      tiles.current.draw()
     }
-    map.on('render', callback)
+    // const callback = () => {
+    //   if (Object.values(camera.current).some(Boolean)) {
+    //     tiles.current.updateCamera(camera.current)
+    //     tiles.current.draw()
+    //   }
+    // }
+    // map.on('render', callback)
 
     return () => {
       regl.clear({
         color: [0, 0, 0, 0],
         depth: 1,
       })
-      map.off('render', callback)
-      map.triggerRepaint()
+      // map.off('render', callback)
+      // map.triggerRepaint()
     }
-  }, [index])
+  }, [index, center.lat, center.lng, zoom])
 
   useEffect(() => {
     tiles.current.updateSelector({ selector })

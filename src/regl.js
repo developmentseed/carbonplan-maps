@@ -16,23 +16,20 @@ export const useRegl = () => {
 
 const Regl = ({ style, extensions, children }) => {
   const regl = useRef()
+  const containerRef = useRef()
   const [ready, setReady] = useState(false)
 
-  const ref = useCallback((node) => {
-    if (node !== null) {
+  useEffect(() => {
+    if (!containerRef.current) return
       regl.current = _regl({
-        container: node,
+        container: containerRef.current,
         extensions: ['OES_texture_float', 'OES_element_index_uint'],
       })
       setReady(true)
-    }
-  }, [])
-
-  useEffect(() => {
-    return () => {
-      if (regl.current) regl.current.destroy()
-      setReady(false)
-    }
+      return () => {
+        if (regl.current) regl.current.destroy()
+        setReady(false)
+      }
   }, [])
 
   return (
@@ -41,7 +38,7 @@ const Regl = ({ style, extensions, children }) => {
         regl: regl.current,
       }}
     >
-      <div style={{ width: '100%', height: '100%', ...style }} ref={ref} />
+      <div style={{ width: '100%', height: '100%', ...style }} ref={containerRef} />
       {ready && children}
     </ReglContext.Provider>
   )

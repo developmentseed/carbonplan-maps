@@ -2,3 +2,4 @@
 .next
 dst
 node_modules
+.env.local
