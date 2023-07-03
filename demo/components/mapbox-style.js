@@ -19,65 +19,19 @@ const Mapbox = ({
   minZoom,
   maxZoom,
   maxBounds,
-  source,
   debug,
-  variable,
-  color, 
-  opacity,
   setZoom,
-  setCenter,
-  width=1
+  setCenter
 }) => {
   const map = useRef()
   const containerRef = useRef()
   const [ready, setReady] = useState()
-  const landSourceId = 'line'
-  const oceanSourceId = 'fill'
-  const landLayerId = 'line-layer'
-  const oceanLayerId = 'fill-layer'
 
-  
   useEffect(() => {
     if (!containerRef.current) return 
-    const mapboxStyle = { version: 8, sources: {
-      [landSourceId]:{
-        type: 'vector',
-        tiles: [`${source}basemaps/land/{z}/{x}/{y}.pbf`],
-        maxzoom: 5
-      },
-      [oceanSourceId]:{
-        type: 'vector',
-        tiles: [`${source}basemaps/ocean/{z}/{x}/{y}.pbf`],
-        maxzoom: 5
-      }
-    }, 
-    layers: [{
-      id: landLayerId,
-      type: 'line',
-      source: landSourceId,
-      'source-layer': variable,
-      layout: { visibility: 'visible' },
-      paint: {
-        'line-blur': 1,
-        'line-color': color,
-        'line-opacity': opacity,
-        'line-width': width,
-      },
-    }, {
-      id: oceanLayerId,
-      type: 'fill',
-      source: oceanSourceId,
-      'source-layer': 'ocean',
-      layout: { visibility: 'visible' },
-      paint: {
-        'fill-color': 'black',
-        'fill-opacity': opacity,
-      }
-    }]}
-
       map.current = new mapboxgl.Map({
         container: containerRef.current,
-        style: mapboxStyle, 
+        style: 'mapbox://styles/mapbox/light-v11',
         minZoom: minZoom,
         maxZoom: maxZoom,
         maxBounds: maxBounds,
@@ -125,7 +79,7 @@ const Mapbox = ({
   }, [debug])
 
   return (
-    
+    <div>
       <div
         style={{
           top: '0px',
@@ -137,7 +91,7 @@ const Mapbox = ({
         ref={containerRef}
       />
       
-    
+    </div>
   )
 }
 

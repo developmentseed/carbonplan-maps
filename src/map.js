@@ -35,6 +35,7 @@ const Map = ({
         width: '100%',
         height: '100%',
         overflow: 'hidden',
+        pointerEvents: 'none',
         ...style,
       }}
     >
@@ -42,8 +43,7 @@ const Map = ({
         extensions={extensions}
         style={{
           position: 'absolute',
-          pointerEvents: 'none',
-          zIndex: -1,
+          pointerEvents: 'none'
         }}
       >
         <LoadingProvider>
