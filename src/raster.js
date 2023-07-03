@@ -15,13 +15,14 @@ const Raster = (props) => {
     regionOptions = {},
     selector = {},
     uniforms = {},
-    center = {lng:0, lat:0},
-    zoom=2
+    center,
+    zoom
   } = props
   
   const [regionDataInvalidated, setRegionDataInvalidated] = useState(
     new Date().getTime()
   )
+  const [tilesInitialized, setTilesInitialized] = useState(false)
   const { regl } = useRegl()
   const { region } = useRegion()
   const { setLoading, clearLoading, loading, chunkLoading, metadataLoading } =
@@ -29,7 +30,6 @@ const Raster = (props) => {
   const tiles = useRef()
   const camera = useRef()
   const lastQueried = useRef()
-
   camera.current = { center: center, zoom: zoom }
   const queryRegion = async (r, s) => {
     const queryStart = new Date().getTime()
@@ -54,14 +54,25 @@ const Raster = (props) => {
         console.log('invalidate') // When zoom is high, this gets called a lot - almost breaks
         // map.triggerRepaint()
         if (!tiles.current) return
-        tiles.current.updateCamera(camera.current)
+        // tiles.current.updateCamera(camera.current)
+        
         tiles.current.draw()
       },
       invalidateRegion: () => {
         setRegionDataInvalidated(new Date().getTime())
       },
     })
+    // tiles.current.size = 128
+    tiles.current.initialized.then(resolved => setTilesInitialized(resolved))
   }, [])
+
+  useEffect(() => {
+    if (tilesInitialized !== true) return
+    console.log(`tile initialized ${tiles.current.initialized}`)
+    
+    tiles.current.updateCamera(camera.current)
+    tiles.current.draw()
+  }, [tilesInitialized])
 
   useEffect(() => {
     if (props.setLoading) {
@@ -78,28 +89,19 @@ const Raster = (props) => {
       props.setChunkLoading(chunkLoading)
     }
   }, [!!props.setChunkLoading, chunkLoading])
-
+  
   useEffect(() => {
     if (!tiles.current) return
     if (Object.values(camera.current).some(Boolean)) {
       tiles.current.updateCamera(camera.current)
       tiles.current.draw()
     }
-    // const callback = () => {
-    //   if (Object.values(camera.current).some(Boolean)) {
-    //     tiles.current.updateCamera(camera.current)
-    //     tiles.current.draw()
-    //   }
-    // }
-    // map.on('render', callback)
-
     return () => {
       regl.clear({
         color: [0, 0, 0, 0],
         depth: 1,
       })
-      // map.off('render', callback)
-      // map.triggerRepaint()
+
     }
   }, [index, center.lat, center.lng, zoom])
 
