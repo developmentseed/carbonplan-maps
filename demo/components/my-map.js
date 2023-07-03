@@ -42,11 +42,13 @@ const Mapbox = ({
     const mapboxStyle = { version: 8, sources: {
       [landSourceId]:{
         type: 'vector',
-        tiles: [`${source}basemaps/land/{z}/{x}/{y}.pbf`]
+        tiles: [`${source}basemaps/land/{z}/{x}/{y}.pbf`],
+        maxzoom: 5
       },
       [oceanSourceId]:{
         type: 'vector',
-        tiles: [`${source}basemaps/ocean/{z}/{x}/{y}.pbf`]
+        tiles: [`${source}basemaps/ocean/{z}/{x}/{y}.pbf`],
+        maxzoom: 5
       }
     }, 
     layers: [{
