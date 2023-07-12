@@ -4,6 +4,7 @@ import { Dimmer, Meta } from '@carbonplan/components'
 import { Map, Raster, Fill, Line, RegionPicker } from '@carbonplan/maps'
 import { useThemedColormap } from '@carbonplan/colormaps'
 import RegionControls from '../components/region-controls'
+import MyMap from '../components/my-map'
 import ParameterControls from '../components/parameter-controls'
 
 const bucket = 'https://carbonplan-maps.s3.us-west-2.amazonaws.com/'
@@ -20,6 +21,9 @@ const Index = () => {
   const colormap = useThemedColormap(colormapName)
   const [showRegionPicker, setShowRegionPicker] = useState(false)
   const [regionData, setRegionData] = useState({ loading: true })
+
+  const[zoom, setZoom] = useState(0)
+  const[center, setCenter] = useState({lng: 0, lat: 0})
 
   const getters = { display, debug, opacity, clim, month, band, colormapName }
   const setters = {
@@ -42,17 +46,6 @@ const Index = () => {
         title={'@carbonplan/maps'}
       />
       <Box sx={{ position: 'absolute', top: 0, bottom: 0, width: '100%' }}>
-        <Map zoom={2} center={[0, 0]} debug={debug}>
-          <Fill
-            color={theme.rawColors.background}
-            source={bucket + 'basemaps/ocean'}
-            variable={'ocean'}
-          />
-          <Line
-            color={theme.rawColors.primary}
-            source={bucket + 'basemaps/land'}
-            variable={'land'}
-          />
           {showRegionPicker && (
             <RegionPicker
               color={theme.colors.primary}
@@ -62,24 +55,39 @@ const Index = () => {
               maxRadius={2000}
             />
           )}
+        <Map>
           <Raster
             colormap={colormap}
             clim={clim}
             display={display}
             opacity={opacity}
             mode={'texture'}
+            zoom={zoom}
+            center={center}
             source={bucket + 'v2/demo/4d/tavg-prec-month'}
             variable={'climate'}
             selector={{ month, band }}
             regionOptions={{ setData: setRegionData }}
           />
-          <RegionControls
-            band={band}
-            regionData={regionData}
-            showRegionPicker={showRegionPicker}
-            setShowRegionPicker={setShowRegionPicker}
-          />
         </Map>
+        <MyMap 
+          initialZoom={zoom} 
+          initialCenter={center} 
+          setZoom={setZoom}
+          setCenter={setCenter}
+          debug={debug} 
+          source={bucket}
+          color={theme.rawColors.primary}
+          variable={'land'}
+          opacity={opacity}
+        />
+        <RegionControls
+          band={band}
+          regionData={regionData}
+          showRegionPicker={showRegionPicker}
+          setShowRegionPicker={setShowRegionPicker}
+        />
+      
         <ParameterControls getters={getters} setters={setters} />
         <Dimmer
           sx={{

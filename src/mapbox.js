@@ -26,16 +26,18 @@ const Mapbox = ({
   children,
 }) => {
   const map = useRef()
+  const containerRef = useRef()
   const [ready, setReady] = useState()
 
-  const ref = useCallback((node) => {
+  useEffect(() => {
+    if (!containerRef.current) return 
     const mapboxStyle = { version: 8, sources: {}, layers: [] }
     if (glyphs) {
       mapboxStyle.glyphs = glyphs
     }
-    if (node !== null) {
+    
       map.current = new mapboxgl.Map({
-        container: node,
+        container: containerRef.current,
         style: mapboxStyle,
         minZoom: minZoom,
         maxZoom: maxZoom,
@@ -44,23 +46,22 @@ const Mapbox = ({
         pitchWithRotate: false,
         touchZoomRotate: true,
       })
+
       if (center) map.current.setCenter(center)
       if (zoom) map.current.setZoom(zoom)
+      
       map.current.touchZoomRotate.disableRotation()
       map.current.touchPitch.disable()
       map.current.on('styledata', () => {
         setReady(true)
       })
-    }
-  }, [])
-
-  useEffect(() => {
-    return () => {
-      if (map.current) {
-        map.current.remove()
-        setReady(false)
+      
+      return () => {
+        if (map.current) {
+          map.current.remove()
+          setReady(false)
+        }
       }
-    }
   }, [])
 
   useEffect(() => {
@@ -81,7 +82,7 @@ const Mapbox = ({
           width: '100%',
           ...style,
         }}
-        ref={ref}
+        ref={containerRef}
       />
       {ready && children}
     </MapboxContext.Provider>
