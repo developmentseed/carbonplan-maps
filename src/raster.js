@@ -51,11 +51,9 @@ const Raster = (props) => {
       setLoading,
       clearLoading,
       invalidate: () => {
-        console.log('invalidate') // When zoom is high, this gets called a lot - almost breaks
-        // map.triggerRepaint()
+        console.log('invalidate') 
+
         if (!tiles.current) return
-        // tiles.current.updateCamera(camera.current)
-        
         tiles.current.draw()
       },
       invalidateRegion: () => {

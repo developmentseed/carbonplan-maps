@@ -281,7 +281,12 @@ export const createTiles = (regl, opts) => {
     })
 
     this.draw = () => {
-      this.drawTiles(this.getProps())
+      this.drawTiles(this.getProps()) // batch rendering: http://regl.party/api#initialization-options 
+      console.log('current bands')
+      console.log(this.getProps())
+      
+      console.log(this.bands)
+      console.log(attributes)
     }
 
     this.updateCamera = ({ center, zoom }) => {
@@ -303,6 +308,8 @@ export const createTiles = (regl, opts) => {
       if (this.size && Object.keys(this.active).length === 0) {
         this.clearLoading(null, { forceClear: true })
       }
+      console.log('active!')
+      console.log(this.actcive)
 
       Promise.all(
         Object.keys(this.active).map(
@@ -361,6 +368,8 @@ export const createTiles = (regl, opts) => {
             })
         )
       ).then((results) => {
+        console.log('restuls')
+        console.log(results)
         if (results.some(Boolean)) {
           invalidateRegion()
         }
