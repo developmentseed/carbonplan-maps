@@ -9,7 +9,8 @@
     "watch": "microbundle watch src/index.js -o dst/index.js --no-compress --jsx React.createElement -f modern,es,cjs --jsxFragment React.Fragment",
     "test": "NODE_ENV=test jest --watch",
     "test:ci": "NODE_ENV=test jest --ci --reporters='default'",
-    "format": "prettier --write 'src/**/*.js'"
+    "format": "prettier --write 'src/**/*.js'",
+    "build-all": "npm run build && cd demo && npm install && npm run build"
   },
   "repository": {
     "type": "git",
