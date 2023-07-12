@@ -2,3 +2,5 @@
 .next
 dst
 node_modules
+.env.local
+Demo/out
