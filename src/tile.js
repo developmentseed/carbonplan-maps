@@ -32,7 +32,7 @@ class Tile {
     this._ready = {}
 
     bands.forEach((k) => {
-      this._buffers[k] = initializeBuffer()
+      this._buffers[k] = initializeBuffer() // return regl texture
     })
 
     this.chunkedData = {}
@@ -56,6 +56,8 @@ class Tile {
               this._loading[key] = true
               this._ready[key] = new Promise((innerResolve) => {
                 this._loader(chunk, (err, data) => {
+                  console.log('chunk data')
+                  console.log(data)
                   this.chunkedData[key] = data
                   this._loading[key] = false
                   innerResolve(true)
@@ -80,8 +82,11 @@ class Tile {
 
   populateBuffersSync(selector) {
     const bandInformation = getBandInformation(selector)
+    console.log("Populate buffer")
+    console.log(bandInformation)
 
     this.bands.forEach((band) => {
+
       const info = bandInformation[band] || selector
       const chunks = getChunks(
         info,
@@ -133,8 +138,12 @@ class Tile {
           `Unexpected data dimensions for band: ${band}. Found ${bandData.dimension}, expected 2. Check the selector value.`
         )
       }
-      this._buffers[band](bandData)
+      console.log("BAND DATA")
+      console.log(this._buffers)
+      this._buffers[band](bandData) // replace empty texture
     })
+    console.log("BUFFER")
+    console.log(this._buffers)
 
     this._bufferCache = getSelectorHash(selector)
   }

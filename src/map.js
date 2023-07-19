@@ -27,7 +27,7 @@ const Map = ({
 }) => {
   return (
     <div
-      id={id}
+      id={'regl-map'}
       tabIndex={tabIndex}
       className={className}
       style={{
@@ -35,37 +35,26 @@ const Map = ({
         width: '100%',
         height: '100%',
         overflow: 'hidden',
+        pointerEvents: 'none',
         ...style,
       }}
     >
-      <Mapbox
-        zoom={zoom}
-        minZoom={minZoom}
-        maxZoom={maxZoom}
-        maxBounds={maxBounds}
-        center={center}
-        debug={debug}
-        glyphs={glyphs}
-        style={{ position: 'absolute' }}
+      <Regl
+        extensions={extensions}
+        style={{
+          position: 'absolute',
+          pointerEvents: 'none'
+        }}
       >
-        <Regl
-          extensions={extensions}
-          style={{
-            position: 'absolute',
-            pointerEvents: 'none',
-            zIndex: -1,
-          }}
-        >
-          <LoadingProvider>
-            <LoadingUpdater
-              setLoading={setLoading}
-              setMetadataLoading={setMetadataLoading}
-              setChunkLoading={setChunkLoading}
-            />
-            <RegionProvider>{children}</RegionProvider>
-          </LoadingProvider>
-        </Regl>
-      </Mapbox>
+        <LoadingProvider>
+          <LoadingUpdater
+            setLoading={setLoading}
+            setMetadataLoading={setMetadataLoading}
+            setChunkLoading={setChunkLoading}
+          />
+          <RegionProvider>{children}</RegionProvider>
+        </LoadingProvider>
+      </Regl>
     </div>
   )
 }

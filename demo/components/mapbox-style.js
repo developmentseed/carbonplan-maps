@@ -4,26 +4,24 @@ import React, {
   useRef,
   useCallback,
   useEffect,
-  useContext,
 } from 'react'
 import mapboxgl from 'mapbox-gl'
+import getConfig from 'next/config'
+const { publicRuntimeConfig } = getConfig()
 
-export const MapboxContext = createContext(null)
-
-export const useMapbox = () => {
-  return useContext(MapboxContext)
-}
+mapboxgl.accessToken = publicRuntimeConfig.MAPBOX_TOKEN
 
 const Mapbox = ({
   glyphs,
   style,
-  center,
-  zoom,
+  initialCenter,
+  initialZoom,
   minZoom,
   maxZoom,
   maxBounds,
   debug,
-  children,
+  setZoom,
+  setCenter
 }) => {
   const map = useRef()
   const containerRef = useRef()
@@ -31,34 +29,46 @@ const Mapbox = ({
 
   useEffect(() => {
     if (!containerRef.current) return 
-    const mapboxStyle = { version: 8, sources: {}, layers: [] }
-    if (glyphs) {
-      mapboxStyle.glyphs = glyphs
-    }
-    
       map.current = new mapboxgl.Map({
         container: containerRef.current,
-        style: mapboxStyle,
+        style: 'mapbox://styles/mapbox/light-v11',
         minZoom: minZoom,
         maxZoom: maxZoom,
         maxBounds: maxBounds,
+        center: initialCenter,
+        zoom: initialZoom,
+        projection: 'mercator',
         dragRotate: false,
         pitchWithRotate: false,
         touchZoomRotate: true,
       })
 
-      if (center) map.current.setCenter(center)
-      if (zoom) map.current.setZoom(zoom)
-      
+      // if (center) map.current.setCenter(center)
+      // if (zoom) map.current.setZoom(zoom)
+
+
+      if (maxZoom) {
+        map.getSource(sourceId).maxzoom = maxZoom
+      }
+
       map.current.touchZoomRotate.disableRotation()
       map.current.touchPitch.disable()
       map.current.on('styledata', () => {
         setReady(true)
       })
+
+      const moveCallback = () => {
+        const currentCenter = map.current.getCenter();
+        const currentZoom = map.current.getZoom();
+        setCenter(currentCenter)
+        setZoom(currentZoom)
+      }
+      map.current.on('render', moveCallback )
       
       return () => {
         if (map.current) {
           map.current.remove()
+          map.current.off('render', moveCallback)
           setReady(false)
         }
       }
@@ -69,11 +79,7 @@ const Mapbox = ({
   }, [debug])
 
   return (
-    <MapboxContext.Provider
-      value={{
-        map: map.current,
-      }}
-    >
+    <div>
       <div
         style={{
           top: '0px',
@@ -84,8 +90,8 @@ const Mapbox = ({
         }}
         ref={containerRef}
       />
-      {ready && children}
-    </MapboxContext.Provider>
+      
+    </div>
   )
 }
 

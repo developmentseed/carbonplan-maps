@@ -1,5 +1,5 @@
 import { Box, IconButton } from 'theme-ui'
-import { useRecenterRegion } from '@carbonplan/maps'
+// import { useRecenterRegion } from '@carbonplan/maps'
 import { XCircle } from '@carbonplan/icons'
 
 const AverageDisplay = ({ band, data: { value } }) => {
@@ -43,7 +43,7 @@ const RegionControls = ({
   showRegionPicker,
   setShowRegionPicker,
 }) => {
-  const { recenterRegion } = useRecenterRegion()
+  // const { recenterRegion } = useRecenterRegion()
 
   return (
     <Box
@@ -82,7 +82,7 @@ const RegionControls = ({
       {showRegionPicker && (
         <IconButton
           aria-label='Recenter map'
-          onClick={recenterRegion}
+          // onClick={recenterRegion}
           sx={{ stroke: 'primary', cursor: 'pointer', width: 34, height: 34 }}
         >
           <svg

@@ -1,9 +1,11 @@
 import { useState } from 'react'
-import { Box, useThemeUI } from 'theme-ui'
-import { Dimmer, Meta } from '@carbonplan/components'
-import { Map, Raster, Fill, Line, RegionPicker } from '@carbonplan/maps'
+import { Flex, Box, useThemeUI } from 'theme-ui'
+import { Dimmer, Meta, Toggle } from '@carbonplan/components'
+import { Map, Raster, RegionPicker } from '@carbonplan/maps'
 import { useThemedColormap } from '@carbonplan/colormaps'
 import RegionControls from '../components/region-controls'
+import MyMap from '../components/my-map'
+import MapboxSatMap from '../components/mapbox-style'
 import ParameterControls from '../components/parameter-controls'
 
 const bucket = 'https://carbonplan-maps.s3.us-west-2.amazonaws.com/'
@@ -20,6 +22,10 @@ const Index = () => {
   const colormap = useThemedColormap(colormapName)
   const [showRegionPicker, setShowRegionPicker] = useState(false)
   const [regionData, setRegionData] = useState({ loading: true })
+  const [showMapboxMap, setShowMapboxMap] = useState(false)
+
+  const[zoom, setZoom] = useState(0)
+  const[center, setCenter] = useState({lng: 0, lat: 0})
 
   const getters = { display, debug, opacity, clim, month, band, colormapName }
   const setters = {
@@ -42,17 +48,6 @@ const Index = () => {
         title={'@carbonplan/maps'}
       />
       <Box sx={{ position: 'absolute', top: 0, bottom: 0, width: '100%' }}>
-        <Map zoom={2} center={[0, 0]} debug={debug}>
-          <Fill
-            color={theme.rawColors.background}
-            source={bucket + 'basemaps/ocean'}
-            variable={'ocean'}
-          />
-          <Line
-            color={theme.rawColors.primary}
-            source={bucket + 'basemaps/land'}
-            variable={'land'}
-          />
           {showRegionPicker && (
             <RegionPicker
               color={theme.colors.primary}
@@ -62,24 +57,49 @@ const Index = () => {
               maxRadius={2000}
             />
           )}
+        {showMapboxMap && <MapboxSatMap 
+          initialZoom={zoom} 
+          initialCenter={center} 
+          setZoom={setZoom}
+          setCenter={setCenter}
+          debug={debug} 
+        />}
+        {!showMapboxMap &&         
+        <MyMap 
+          initialZoom={zoom} 
+          initialCenter={center} 
+          setZoom={setZoom}
+          setCenter={setCenter}
+          debug={debug} 
+          source={bucket}
+          color={theme.rawColors.primary}
+          variable={'land'}
+          opacity={opacity}
+          style={{zIndex: 1}}
+        />}
+        <Map style={{zIndex: showMapboxMap? 1: -1}}>
           <Raster
             colormap={colormap}
             clim={clim}
             display={display}
             opacity={opacity}
             mode={'texture'}
+            zoom={zoom}
+            center={center}
             source={bucket + 'v2/demo/4d/tavg-prec-month'}
             variable={'climate'}
             selector={{ month, band }}
             regionOptions={{ setData: setRegionData }}
           />
-          <RegionControls
-            band={band}
-            regionData={regionData}
-            showRegionPicker={showRegionPicker}
-            setShowRegionPicker={setShowRegionPicker}
-          />
         </Map>
+      <div style={{zIndex: 2, position: 'absolute', top: 0, left: 0, right: 0}}>
+        <RegionControls
+          band={band}
+          regionData={regionData}
+          showRegionPicker={showRegionPicker}
+          setShowRegionPicker={setShowRegionPicker}
+        />
+      
         <ParameterControls getters={getters} setters={setters} />
         <Dimmer
           sx={{
@@ -90,6 +110,25 @@ const Index = () => {
             bottom: [17, 17, 15, 15],
           }}
         />
+        <Box sx={{ position: 'absolute', top: 150, right: 20 }}>
+        <Flex
+          sx={{
+            flexDirection: 'column',
+            alignItems: 'flex-end',
+            gap: 4,
+          }}
+        >
+          <Box>
+            <Box>Show Mapbox Basemap</Box>
+              <Toggle
+                sx={{ float: 'right', mt: 20 }}
+                value={showMapboxMap}
+                onClick={() => setShowMapboxMap((prev) => !prev)}
+              />
+            </Box>
+          </Flex>
+        </Box>
+        </div>
       </Box>
     </>
   )
